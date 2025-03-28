@@ -1,0 +1,5 @@
+# Ignore the entire questionnaire folder
+/src/app/questionnaire/
+/components/questionnaire/
+
+/components/profile/profile.jsx
