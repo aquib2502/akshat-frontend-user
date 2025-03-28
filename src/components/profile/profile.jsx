@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import axios from "axios";
 import Navbar from "../../components/layout/navbar.jsx";
+import axios from "axios";
 
 export default function Profile() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [user, setUser] = useState(null);
-  const [feedbackReports, setFeedbackReports] = useState([]);
-
   const [editMode, setEditMode] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [feedbackReports, setFeedbackReports] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,67 +28,107 @@ export default function Profile() {
   const [message, setMessage] = useState("");
   const [token, setToken] = useState("");
 
-  // Fetch user data from the API when the component loads
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (!storedToken) {
       router.push("/login");
     } else {
       setToken(storedToken);
-
-      // Fetch user data from the API using the token
-      const fetchUserData = async () => {
-        try {
-          const response = await axios.get("http://localhost:3046/api/auth/profile", {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
-
-          if (response.data.success) {
-            const fetchedUser = response.data.user;
-            if (fetchedUser) {
-              setUser(fetchedUser);
-              setFormData({
-                name: fetchedUser.name || "",
-                email: fetchedUser.email || "",
-                mobile: fetchedUser.mobile || "",
-                dob: fetchedUser.dob || "",
-                address: fetchedUser.address || "",
-                pincode: fetchedUser.pincode || "",
-                extraOption: fetchedUser.extraOption || "",
-                profilePic: fetchedUser.profilePic || "/default-avatar.png",
-              });
-              setPreviewPic(fetchedUser.profilePic || "/default-avatar.png");
-            } else {
-              localStorage.removeItem("authToken"); // Clear invalid token
-              setMessage("User not found, please log in again.");
-              setTimeout(() => router.push("/login"), 2000); // Redirect to login page after 2 seconds
-            }
-          } else {
-            setMessage("Failed to load user data.");
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setMessage("Error fetching user data.");
+      const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+      setUser(
+        storedUser || {
+          name: "User",
+          email: "user@example.com",
+          mobile: "",
+          dob: "",
+          address: "",
+          pincode: "",
+          extraOption: "",
+          image: "/default-avatar.png",
         }
-      };
-
-      fetchUserData();
+      );
     }
   }, [router]);
 
-  // Fetch feedback reports when Reports tab is active
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        mobile: user.mobile || "",
+        dob: user.dob || "",
+        address: user.address || "",
+        pincode: user.pincode || "",
+        extraOption: user.extraOption || "",
+        profilePic: null,
+      });
+      setPreviewPic(user.image || "/default-avatar.png");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (activeTab === "appointments") {
+      fetchAppointments();
+    }
+  }, [activeTab, token]);
+
+  const fetchAppointments = async () => {
+    setLoadingAppointments(true);
+    try {
+      const response = await axios.get("https://consultancy-api.code4bharat.com/api/appointments/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setAppointments(response.data.appointments);
+      } else {
+        setAppointments([]);
+      }
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+    }
+    setLoadingAppointments(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profilePic" && files?.[0]) {
+      setFormData({ ...formData, profilePic: files[0] });
+      setPreviewPic(URL.createObjectURL(files[0]));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    const updatedUser = {
+      ...user,
+      name: formData.name,
+      email: formData.email,
+      mobile: formData.mobile,
+      dob: formData.dob,
+      address: formData.address,
+      pincode: formData.pincode,
+      extraOption: formData.extraOption,
+      image: previewPic,
+    };
+    setUser(updatedUser);
+    localStorage.setItem("userInfo", JSON.stringify(updatedUser));
+    setMessage("Profile updated successfully!");
+    setEditMode(false);
+    setTimeout(() => setMessage(""), 2000);
+  };
+
   useEffect(() => {
     if (activeTab === "reports") {
       const fetchFeedbackReports = async (token) => {
         try {
-          const response = await axios.get("http://localhost:3046/api/user/feedbackReports", {
+          const response = await axios.get("http://localhost:3046/api/feedback/feedback-report", {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           if (response.data.success) {
-            setFeedbackReports(response.data.reports); // Store the array of feedback reports
+            setFeedbackReports(response.data.reports);
           } else {
             setFeedbackReports([]);
             setMessage("No feedback reports found.");
@@ -120,12 +159,9 @@ export default function Profile() {
 
   return (
     <div className="flex flex-col min-h-screen mt-2.5 pt-16">
-      <Navbar/>
-      {/* Your navbar component */}
+      <Navbar />
       <div className="flex flex-1 bg-gray-50 ">
-        {/* Sidebar */}
         <div className="w-64 border-2 ml-1.5 border-black bg-sky-200 text-black p-6 flex flex-col rounded-3xl mb-4 shadow-lg">
-          {/* Profile Picture & Name */}
           <div className="flex flex-col items-center mb-8">
             <Image
               src={previewPic || ""}
@@ -139,7 +175,6 @@ export default function Profile() {
             <p className="text-sm">{user.email}</p>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-grow">
             <button
               onClick={() => {
@@ -170,7 +205,6 @@ export default function Profile() {
             </button>
           </nav>
 
-          {/* Logout Button */}
           <button
             onClick={handleLogout}
             className="mt-auto p-4 w-full bg-red-500 hover:bg-red-600 text-white rounded-md"
@@ -179,7 +213,6 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 p-8 overflow-y-auto">
           {activeTab === "dashboard" && !editMode && (
             <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -227,20 +260,18 @@ export default function Profile() {
           )}
 
           {activeTab === "reports" && (
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h1 className="text-3xl font-bold text-blue-500 mb-4">Your Feedback Reports</h1>
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-3xl font-bold text-[#3674B5] mb-4">Feedback Reports</h2>
               {feedbackReports.length === 0 ? (
                 <p>No feedback reports found.</p>
               ) : (
-                <ul>
-                  {feedbackReports.map((report) => (
-                    <li key={report._id} className="border-b py-2 text-black">
-                      <p><strong>Report ID:</strong> {report._id}</p>
-                      <p><strong>Feedback:</strong> {report.feedback}</p>
-                      <p><strong>Date:</strong> {new Date(report.date).toLocaleDateString()}</p>
-                    </li>
-                  ))}
-                </ul>
+                feedbackReports.map((report, index) => (
+                  <div key={index} className="bg-gray-100 p-4 rounded-md mb-6">
+                    <p className="mb-2"><strong>Report ID:</strong> {report._id}</p>
+                    <p className="mb-2"><strong>Feedback:</strong> {report.feedback}</p>
+                    <p className="mb-4"><strong>Date:</strong> {new Date(report.date).toLocaleDateString()}</p>
+                  </div>
+                ))
               )}
             </div>
           )}
