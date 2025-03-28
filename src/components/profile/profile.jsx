@@ -14,6 +14,7 @@ export default function Profile() {
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [feedbackReports, setFeedbackReports] = useState([]);
+  const [loadingFeedbackReports, setLoadingFeedbackReports] = useState(false);  // For loading state of feedback reports
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -75,7 +76,7 @@ export default function Profile() {
   const fetchAppointments = async () => {
     setLoadingAppointments(true);
     try {
-      const response = await axios.get("https://consultancy-api.code4bharat.com/api/appointments/user", {
+      const response = await axios.get("http://localhost:3046/api/appointments/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.success) {
@@ -87,6 +88,27 @@ export default function Profile() {
       console.error("Error fetching appointments:", error);
     }
     setLoadingAppointments(false);
+  };
+
+  const fetchFeedbackReports = async () => {
+    setLoadingFeedbackReports(true);  // Set loading state for feedback reports
+    try {
+      // Here’s the updated API call to fetch feedback reports
+      const response = await axios.get('http://localhost:3046/api/auth/feedback-report', {
+        headers: {
+          Authorization: `Bearer ${token}`  // Send the token as Authorization header
+        }
+      });
+
+      if (response.data.success) {
+        setFeedbackReports(response.data.feedbackReports);
+      } else {
+        setFeedbackReports([]);
+      }
+    } catch (error) {
+      console.error('Error fetching feedback reports:', error);
+    }
+    setLoadingFeedbackReports(false);  // End loading state
   };
 
   const handleChange = (e) => {
@@ -118,35 +140,6 @@ export default function Profile() {
     setEditMode(false);
     setTimeout(() => setMessage(""), 2000);
   };
-
-  useEffect(() => {
-    if (activeTab === "reports") {
-      const fetchFeedbackReports = async (token) => {
-        try {
-          const response = await axios.get("http://localhost:3046/api/feedback/feedback-report", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (response.data.success) {
-            setFeedbackReports(response.data.reports);
-          } else {
-            setFeedbackReports([]);
-            setMessage("No feedback reports found.");
-          }
-        } catch (error) {
-          if (error.response?.status === 404) {
-            setFeedbackReports([]);
-            setMessage("No feedback reports found.");
-          } else {
-            console.error("Error fetching feedback reports:", error);
-            setMessage("Error fetching feedback reports.");
-          }
-        }
-      };
-
-      fetchFeedbackReports(token);
-    }
-  }, [activeTab, token]);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -181,25 +174,22 @@ export default function Profile() {
                 setActiveTab("dashboard");
                 setEditMode(false);
               }}
-              className={`block w-full text-left p-4 rounded-md mb-2 ${
-                activeTab === "dashboard" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"
-              }`}
+              className={`block w-full text-left p-4 rounded-md mb-2 ${activeTab === "dashboard" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
             >
               Dashboard
             </button>
             <button
               onClick={() => setActiveTab("appointments")}
-              className={`block w-full text-left p-4 rounded-md mb-2 ${
-                activeTab === "appointments" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"
-              }`}
+              className={`block w-full text-left p-4 rounded-md mb-2 ${activeTab === "appointments" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
             >
               Appointments
             </button>
             <button
-              onClick={() => setActiveTab("reports")}
-              className={`block w-full text-left p-4 rounded-md ${
-                activeTab === "reports" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"
-              }`}
+              onClick={() => {
+                setActiveTab("reports");
+                fetchFeedbackReports(); // Trigger fetching feedback when the tab is clicked
+              }}
+              className={`block w-full text-left p-4 rounded-md ${activeTab === "reports" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
             >
               Reports
             </button>
@@ -260,20 +250,39 @@ export default function Profile() {
           )}
 
           {activeTab === "reports" && (
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-3xl font-bold text-[#3674B5] mb-4">Feedback Reports</h2>
-              {feedbackReports.length === 0 ? (
-                <p>No feedback reports found.</p>
-              ) : (
-                feedbackReports.map((report, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-md mb-6">
-                    <p className="mb-2"><strong>Report ID:</strong> {report._id}</p>
-                    <p className="mb-2"><strong>Feedback:</strong> {report.feedback}</p>
-                    <p className="mb-4"><strong>Date:</strong> {new Date(report.date).toLocaleDateString()}</p>
-                  </div>
-                ))
-              )}
-            </div>
+           <div className="bg-white p-6 rounded-lg shadow-md">
+           <h2 className="text-3xl font-bold text-[#3674B5] mb-4">Feedback Reports</h2>
+           {loadingFeedbackReports ? (
+             <p>Loading feedback reports...</p>
+           ) : feedbackReports.length === 0 ? (
+             <p>No feedback reports found.</p>
+           ) : (
+             feedbackReports.map((report, index) => (
+               <div key={index} className="bg-gray-100 text-black p-4 rounded-md mb-6">
+                 <p className="mb-2"><strong>Report ID:</strong> {report._id}</p>
+                 <p className="mb-2"><strong>Feedback:</strong> 
+                   {(() => {
+                     try {
+                       // Parse the JSON response
+                       const parsed = JSON.parse(report.feedbackSummary);
+                       let feedbackText = parsed.parts?.[0]?.text || '';
+         
+                       // Replace any **text** with bold HTML tags
+                       feedbackText = feedbackText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+         
+                       // Return the formatted text
+                       return <span dangerouslySetInnerHTML={{ __html: feedbackText }} />;
+                     } catch (e) {
+                       console.error("Feedback Parse Error:", e);
+                       return <p>Summary is not available.</p>;
+                     }
+                   })()}
+                 </p>
+                 <p className="mb-4"><strong>Date:</strong> {new Date(report.createdAt).toLocaleDateString()}</p>
+               </div>
+             ))
+           )}
+         </div>
           )}
         </div>
       </div>
