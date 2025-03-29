@@ -15,9 +15,16 @@ export default function AppointmentForm() {
     name: "",
     mobile: "",
   });
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [token, setToken] = useState("");
   const [blurBg, setBlurBg] = useState(false);
   const [error, setError] = useState("");
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([
+    "10:00 AM - 11:00 AM",
+    "11:00 AM - 12:00 PM",
+    "2:00 PM - 3:00 PM",
+    "3:00 PM - 4:00 PM",
+  ]);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +35,29 @@ export default function AppointmentForm() {
       setToken(storedToken);
     }
   }, [router]);
+
+  useEffect(() => {
+    // Fetch booked slots when a date is selected
+    if (formData.date) {
+      fetchBookedSlots(formData.date);
+    }
+  }, [formData.date]);
+
+  const fetchBookedSlots = async (date) => {
+    try {
+      const response = await axios.get("http://localhost:3046/api/appointments/booked-slots", {
+        params: { date }, // Send the date to filter booked slots
+      });
+      if (response.data.success) {
+        setBookedSlots(response.data.bookedSlots);
+      } else {
+        setBookedSlots([]);
+      }
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+      setBookedSlots([]);
+    }
+  };
 
   const handleFocus = () => setBlurBg(true);
   const handleBlur = () => setBlurBg(false);
@@ -66,11 +96,14 @@ export default function AppointmentForm() {
     }
   };
 
+  // Filter out booked slots from available time slots
+  const filteredTimeSlots = availableTimeSlots.filter(
+    (slot) => !bookedSlots.some((booked) => booked.time === slot)
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
       <Navbar />
-
-      {/* Hero Section */}
       <section className="relative min-h-[40vh] flex flex-col items-center justify-center text-center px-4 sm:px-8 md:px-16 lg:px-24 py-20 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500" />
@@ -153,36 +186,31 @@ export default function AppointmentForm() {
                   Mode of Consultation
                 </label>
                 <div className="flex gap-4">
-                  {[
-                    { value: "online", label: "Online", icon: Monitor },
-                    { value: "in-person", label: "In-Person", icon: Building }
-                  ].map((mode) => (
-                    <label
-                      key={mode.value}
-                      className={`flex-1 flex items-center gap-2 p-4 rounded-xl border cursor-pointer transition-all ${
-                        formData.mode.toLowerCase() === mode.value
-                          ? "bg-blue-500/10 border-blue-500/50"
-                          : "bg-white/50 border-gray-200 hover:bg-blue-500/5"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="mode"
-                        value={mode.value}
-                        checked={formData.mode.toLowerCase() === mode.value}
-                        onChange={handleChange}
-                        className="hidden"
-                      />
-                      <mode.icon className={`w-5 h-5 ${
-                        formData.mode.toLowerCase() === mode.value
-                          ? "text-blue-600"
-                          : "text-gray-400"
-                      }`} />
-                      <span className={formData.mode.toLowerCase() === mode.value ? "text-blue-600" : "text-gray-600"}>
-                        {mode.label}
-                      </span>
-                    </label>
-                  ))}
+                  {[{ value: "online", label: "Online", icon: Monitor }, { value: "in-person", label: "In-Person", icon: Building }].map(
+                    (mode) => (
+                      <label
+                        key={mode.value}
+                        className={`flex-1 flex items-center gap-2 p-4 rounded-xl border cursor-pointer transition-all ${
+                          formData.mode.toLowerCase() === mode.value
+                            ? "bg-blue-500/10 border-blue-500/50"
+                            : "bg-white/50 border-gray-200 hover:bg-blue-500/5"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="mode"
+                          value={mode.value}
+                          checked={formData.mode.toLowerCase() === mode.value}
+                          onChange={handleChange}
+                          className="hidden"
+                        />
+                        <mode.icon className={`w-5 h-5 ${formData.mode.toLowerCase() === mode.value ? "text-blue-600" : "text-gray-400"}`} />
+                        <span className={formData.mode.toLowerCase() === mode.value ? "text-blue-600" : "text-gray-600"}>
+                          {mode.label}
+                        </span>
+                      </label>
+                    )
+                  )}
                 </div>
               </div>
 
@@ -223,10 +251,11 @@ export default function AppointmentForm() {
                       className="w-full bg-white/50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     >
                       <option value="">Select a time</option>
-                      <option value="10:00 AM - 11:00 AM">10:00 AM - 11:00 AM</option>
-                      <option value="11:00 AM - 12:00 PM">11:00 AM - 12:00 PM</option>
-                      <option value="2:00 PM - 3:00 PM">2:00 PM - 3:00 PM</option>
-                      <option value="3:00 PM - 4:00 PM">3:00 PM - 4:00 PM</option>
+                      {filteredTimeSlots.map((slot) => (
+                        <option key={slot} value={slot}>
+                          {slot}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -292,19 +321,7 @@ export default function AppointmentForm() {
             </form>
           </div>
         </motion.div>
-
-        {/* Decorative Elements */}
-        <div className="absolute top-40 -left-64 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 -right-64 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
       </div>
-
-      {/* Footer */}
-      <footer className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white py-8">
-        <div className="relative z-10 text-center">
-          <p className="text-white/90">&copy; {new Date().getFullYear()} Consultancy Firm. All Rights Reserved.</p>
-        </div>
-        <div className="absolute inset-0 bg-[url('/path/to/pattern.svg')] opacity-10"></div>
-      </footer>
     </div>
   );
 }
