@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Router from "next/router";
@@ -8,12 +7,12 @@ export default function AdaptiveQuestionnaire() {
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [responses, setResponses] = useState({});
   const [error, setError] = useState("");
-  const [category, setCategory] = useState("Career Guidance");
+  const [category, setCategory] = useState("");  // Start with an empty category
   const [token, setToken] = useState("");
   const [appointmentId, setAppointmentId] = useState("");
   const [questionCount, setQuestionCount] = useState(0);
 
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
@@ -23,10 +22,17 @@ export default function AdaptiveQuestionnaire() {
 
     const appointmentIdParam = new URLSearchParams(window.location.search).get("appointmentId");
     setAppointmentId(appointmentIdParam);
+
+    const categoryParam = new URLSearchParams(window.location.search).get("category");
+    if (categoryParam) {
+      setCategory(categoryParam);  // Dynamically set category from the URL
+    } else {
+      setCategory("Career Guidance");  // Default to "Career Guidance" if not provided in the URL
+    }
   }, []);
 
   useEffect(() => {
-    if (!token || !appointmentId) return;
+    if (!token || !appointmentId || !category) return;
 
     const fetchStartingQuestion = async () => {
       try {
@@ -55,7 +61,7 @@ export default function AdaptiveQuestionnaire() {
       // Submit questionnaire and redirect after success
       try {
         const response = await axios.post(
-          'http://localhost:3046/api/questionnaire/submit',
+          "http://localhost:3046/api/questionnaire/submit",
           { appointmentId, responses: { ...responses, [currentQuestion.questionId]: answer } },
           { headers: { Authorization: `Bearer ${token}` } }
         );

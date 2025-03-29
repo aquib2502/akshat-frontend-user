@@ -108,7 +108,7 @@ export default function AppointmentForm() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           viewport={{ once: true }}
           className="max-w-4xl mx-auto"
         >
@@ -140,10 +140,10 @@ export default function AppointmentForm() {
                   <option value="">Select a category</option>
                   <option value="Career Guidance">Career Guidance</option>
                   <option value="Parenting">Parenting</option>
-                  <option value="Family/Couple">Family/Couple Counselling</option>
+                  <option value="Family/Couple Counselling">Family/Couple Counselling</option>
                   <option value="Depression/Anxiety/Stress">Depression/Anxiety/Stress</option>
                   <option value="Suicidal Thoughts">Suicidal Thoughts</option>
-                  <option value="Children/ Teen / Students Counselling">Children/ Teen / Students Counselling</option>
+                  <option value="Children/Teen/Students Counselling">Children/ Teen / Students Counselling</option>
                 </select>
               </div>
 

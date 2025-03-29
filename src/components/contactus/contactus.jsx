@@ -27,7 +27,7 @@ export default function ContactUsPage() {
         <div className="absolute inset-0 backdrop-blur-[100px]" />
         
         {/* Content */}
-        <div className="relative z-10">
+        <div className="relative z-10 ">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -61,7 +61,7 @@ export default function ContactUsPage() {
       </section>
 
       {/* Contact Form Section */}
-      <div className="relative flex-grow px-4 sm:px-8 md:px-16 lg:px-24 pb-24 overflow-hidden"> {/* Added overflow-hidden */}
+      <div className="relative py-12 flex-grow px-4 sm:px-8 md:px-16 lg:px-24 overflow-hidden"> {/* Added overflow-hidden */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

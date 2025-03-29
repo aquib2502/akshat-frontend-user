@@ -55,7 +55,7 @@ export default function AboutUs() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.2 }}
           viewport={{ once: true }}
           className="group"
         >
@@ -98,8 +98,8 @@ export default function AboutUs() {
           viewport={{ once: true }}
           className="group"
         >
-          <div className="relative bg-gradient-to-b from-white to-gray-50/50 rounded-2xl p-8 shadow-lg backdrop-blur-sm border border-white/20 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
-            <div className="relative w-16 h-16 mb-6">
+          <div className="relative h-full  bg-gradient-to-b from-white to-gray-50/50 rounded-2xl p-8 shadow-lg backdrop-blur-sm border border-white/20 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]">
+            <div className="relative w-16 h-8 md:h-16 mb-6">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
               <div className="relative w-full h-full bg-white rounded-xl flex items-center justify-center">
                 <Eye className="w-8 h-8 text-purple-600" />

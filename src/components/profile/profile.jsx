@@ -74,6 +74,8 @@ export default function Profile() {
     }
   }, [activeTab, token]);
 
+ 
+
   const fetchAppointments = async () => {
     setLoadingAppointments(true);
     try {
@@ -111,6 +113,12 @@ export default function Profile() {
     }
     setLoadingFeedbackReports(false);  // End loading state
   };
+
+  useEffect(() => {
+    if (activeTab === "reports") {
+      fetchFeedbackReports();
+    }
+  }, [activeTab, token]);
 
 
   const handleChange = (e) => {
@@ -317,14 +325,23 @@ export default function Profile() {
                       className="p-6 bg-gray-50 rounded-xl border border-gray-100"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Calendar className="w-5 h-5 text-blue-600" />
-                          <div>
-                            <p className="font-medium">{app.date}</p>
-                            <p className="text-sm text-black">{app.time}</p>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium text-black">
+                            {new Date(app.date).toISOString().split('T')[0]}
+                          </p>
+                          <p className="text-sm text-black">
+                            {new Date(app.date).toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false, // 24-hour format
+                            })}
+                          </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                      </div>
+                           <div className="flex items-center gap-2">
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             app.status === "confirmed"
                               ? "bg-green-100 text-green-600"
@@ -336,7 +353,7 @@ export default function Profile() {
                       </div>
                       <div className="mt-4">
                         <p className="text-sm text-black">Type</p>
-                        <p className="font-medium">{app.type}</p>
+                        <p className="font-medium text-violet-500">{app.type}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -371,7 +388,7 @@ export default function Profile() {
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="font-medium">Report ID: {report._id}</p>
+                 <strong> <p className="font-medium text-black">Report ID: {report._id}</p></strong>
                   <p className="text-sm text-black">
                     Date: {new Date(report.createdAt).toLocaleDateString()}
                   </p>
@@ -379,34 +396,39 @@ export default function Profile() {
               </div>
             </div>
             <div className="mt-4">
-              <p className="text-sm text-black">Feedback</p>
-              <div className="font-medium mt-2">
-                {(() => {
-                  try {
-                    const parsed = JSON.parse(report.feedbackSummary);
-                    let feedbackText = parsed.parts?.[0]?.text || '';
-                    feedbackText = feedbackText.replace(
-                      /\\(.?)\\*/g,
-                      '<span class="text-blue-600 font-semibold">$1</span>'
-                    );
-                    return (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-gray-700"
-                        dangerouslySetInnerHTML={{ __html: feedbackText }}
-                      />
-                    );
-                  } catch (e) {
-                    console.error("Feedback Parse Error:", e);
-                    return (
-                      <p className="text-red-500">Summary is not available.</p>
-                    );
-                  }
-                })()}
-              </div>
+  <p className="text-sm text-black">Feedback</p>
+            <div className="font-medium mt-2">
+              {(() => {
+                try {
+                  const parsed = JSON.parse(report.feedbackSummary);
+                  let feedbackText = parsed.parts?.[0]?.text || '';
+                  feedbackText = feedbackText.replace(
+                    /\\(.?)\\*/g,
+                    '<span class="text-blue-600 font-semibold">$1</span>'
+                  );
+                  feedbackText = feedbackText
+                    .replace(/"Very Ready"/g, '<b>Very Ready</b>')
+                    .replace(/"Confident"/g, '<b>Confident</b>')
+                    .replace(/"Somewhat Clear"/g, '<b>Somewhat Clear</b>')
+                    .replace(/"Poorly"/g, '<b>Poorly</b>')
+                    .replace(/"dawdaw"/g, '<b>dawdaw</b>');
+
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-purple-800"
+                      dangerouslySetInnerHTML={{ __html: feedbackText }}
+                    />
+                  );
+                } catch (e) {
+                  console.error("Feedback Parse Error:", e);
+                  return <p className="text-red-500">Summary is not available.</p>;
+                }
+              })()}
             </div>
+</div>
           </motion.div>
         ))}
       </div>
