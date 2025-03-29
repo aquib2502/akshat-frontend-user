@@ -1,10 +1,11 @@
-"use client"; // Ensure this is a client-side component
-
+"use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "../../components/layout/navbar.jsx";
 import axios from "axios";
+import { motion } from "framer-motion";
+import { User, Calendar, Phone, MapPin, Hash, Settings, LogOut, FileText, Clock, ChevronRight } from "lucide-react";
 
 export default function Profile() {
   const router = useRouter();
@@ -147,78 +148,145 @@ export default function Profile() {
   };
 
   if (!user) {
-    return <p className="text-center mt-10 text-black">Loading user data...</p>;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+        <div className="animate-pulse text-blue-600 text-xl">Loading user data...</div>
+      </div>
+    );
   }
 
+  const navItems = [
+    { id: "dashboard", label: "Dashboard", icon: User },
+    { id: "appointments", label: "Appointments", icon: Calendar },
+    { id: "reports", label: "Reports", icon: FileText },
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen mt-2.5 pt-16">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Navbar />
-      <div className="flex flex-1 bg-gray-50 ">
-        <div className="w-64 border-2 ml-1.5 border-black bg-sky-200 text-black p-6 flex flex-col rounded-3xl mb-4 shadow-lg">
+
+      <div className="container mx-auto px-4 py-8 flex gap-8">
+        {/* Sidebar */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-80 bg-white rounded-2xl shadow-lg p-6 h-fit"
+        >
           <div className="flex flex-col items-center mb-8">
-            <Image
-              src={previewPic || ""}
-              alt="Profile Picture"
-              width={100}
-              height={100}
-              className="rounded-full border-4 border-white shadow-lg"
-              unoptimized
-            />
-            <p className="mt-4 text-xl font-semibold">{user.name}</p>
-            <p className="text-sm">{user.email}</p>
+            <div className="relative">
+              <Image
+                src={previewPic || ""}
+                alt="Profile"
+                width={120}
+                height={120}
+                className="rounded-full border-4 border-blue-100 shadow-lg"
+                unoptimized
+              />
+              <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-2 shadow-lg">
+                <Settings className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <h2 className="mt-4 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              {user.name}
+            </h2>
+            <p className="text-gray-500 text-sm">{user.email}</p>
           </div>
 
-          <nav className="flex-grow">
-            <button
-              onClick={() => {
-                setActiveTab("dashboard");
-                setEditMode(false);
-              }}
-              className={`block w-full text-left p-4 rounded-md mb-2 ${activeTab === "dashboard" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab("appointments")}
-              className={`block w-full text-left p-4 rounded-md mb-2 ${activeTab === "appointments" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
-            >
-              Appointments
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("reports");
-                fetchFeedbackReports(); // Trigger fetching feedback when the tab is clicked
-              }}
-              className={`block w-full text-left p-4 rounded-md ${activeTab === "reports" ? "bg-white text-blue-500 font-semibold" : "hover:bg-blue-600"}`}
-            >
-              Reports
-            </button>
+          <nav className="space-y-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setEditMode(false);
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  activeTab === item.id
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+                {activeTab === item.id && (
+                  <ChevronRight className="w-5 h-5 ml-auto" />
+                )}
+              </button>
+            ))}
           </nav>
 
           <button
             onClick={handleLogout}
-            className="mt-auto p-4 w-full bg-red-500 hover:bg-red-600 text-white rounded-md"
+            className="w-full mt-8 flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all"
           >
-            Logout
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Logout</span>
           </button>
-        </div>
+        </motion.div>
 
-        <div className="flex-1 p-8 overflow-y-auto">
+        {/* Main Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex-1"
+        >
+          {message && (
+            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl text-green-600 text-center">
+              {message}
+            </div>
+          )}
+
           {activeTab === "dashboard" && !editMode && (
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h1 className="text-3xl font-bold text-blue-500 mb-4">Dashboard</h1>
-              <div className="space-y-2 text-black">
-                <p><strong>Name:</strong> {user.name}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Mobile:</strong> {user.mobile || "N/A"}</p>
-                <p><strong>DOB:</strong> {user.dob || "N/A"}</p>
-                <p><strong>Address:</strong> {user.address || "N/A"}</p>
-                <p><strong>Pincode:</strong> {user.pincode || "N/A"}</p>
-                <p><strong>Option:</strong> {user.extraOption || "N/A"}</p>
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8">
+                Personal Information
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Full Name</p>
+                      <p className="font-medium">{user.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Date of Birth</p>
+                      <p className="font-medium">{user.dob || "Not set"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Mobile Number</p>
+                      <p className="font-medium">{user.mobile || "Not set"}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p className="font-medium">{user.address || "Not set"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Hash className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Pincode</p>
+                      <p className="font-medium">{user.pincode || "Not set"}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setEditMode(true)}
-                className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                className="mt-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
               >
                 Edit Profile
               </button>
@@ -226,65 +294,91 @@ export default function Profile() {
           )}
 
           {activeTab === "appointments" && (
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h1 className="text-3xl font-bold text-blue-500 mb-4">Your Appointments</h1>
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8">
+                Your Appointments
+              </h1>
               {loadingAppointments ? (
-                <p>Loading appointments...</p>
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
               ) : appointments.length === 0 ? (
-                <p>No appointments found.</p>
+                <div className="text-center py-8 text-gray-500">
+                  No appointments found
+                </div>
               ) : (
-                <ul>
+                <div className="space-y-4">
                   {appointments.map((app) => (
-                    <li key={app._id} className="border-b py-2 text-black">
-                      <p>
-                        <strong>Date:</strong> {app.date} | <strong>Time:</strong> {app.time}
-                      </p>
-                      <p>
-                        <strong>Type:</strong> {app.type} | <strong>Status:</strong> {app.status}
-                      </p>
-                    </li>
+                    <motion.div
+                      key={app._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-6 bg-gray-50 rounded-xl border border-gray-100"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <p className="font-medium">{app.date}</p>
+                            <p className="text-sm text-gray-500">{app.time}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            app.status === "confirmed"
+                              ? "bg-green-100 text-green-600"
+                              : "bg-yellow-100 text-yellow-600"
+                          }`}>
+                            {app.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-500">Type</p>
+                        <p className="font-medium">{app.type}</p>
+                      </div>
+                    </motion.div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           )}
 
           {activeTab === "reports" && (
-           <div className="bg-white p-6 rounded-lg shadow-md">
-           <h2 className="text-3xl font-bold text-[#3674B5] mb-4">Feedback Reports</h2>
-           {loadingFeedbackReports ? (
-             <p>Loading feedback reports...</p>
-           ) : feedbackReports.length === 0 ? (
-             <p>No feedback reports found.</p>
-           ) : (
-             feedbackReports.map((report, index) => (
-               <div key={index} className="bg-gray-100 text-black p-4 rounded-md mb-6">
-                 <p className="mb-2"><strong>Report ID:</strong> {report._id}</p>
-                 <p className="mb-2"><strong>Feedback:</strong> 
-                   {(() => {
-                     try {
-                       // Parse the JSON response
-                       const parsed = JSON.parse(report.feedbackSummary);
-                       let feedbackText = parsed.parts?.[0]?.text || '';
-         
-                       // Replace any **text** with bold HTML tags
-                       feedbackText = feedbackText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-         
-                       // Return the formatted text
-                       return <span dangerouslySetInnerHTML={{ __html: feedbackText }} />;
-                     } catch (e) {
-                       console.error("Feedback Parse Error:", e);
-                       return <p>Summary is not available.</p>;
-                     }
-                   })()}
-                 </p>
-                 <p className="mb-4"><strong>Date:</strong> {new Date(report.createdAt).toLocaleDateString()}</p>
-               </div>
-             ))
-           )}
-         </div>
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8">
+                Feedback Reports
+              </h1>
+              {feedbackReports.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No feedback reports found
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {feedbackReports.map((report, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-6 bg-gray-50 rounded-xl border border-gray-100"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <Clock className="w-5 h-5 text-blue-600" />
+                        <p className="text-sm text-gray-500">
+                          {new Date(report.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="text-sm text-gray-500">Report ID</p>
+                      <p className="font-medium mb-4">{report._id}</p>
+                      <p className="text-sm text-gray-500">Feedback</p>
+                      <p className="font-medium">{report.feedback}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

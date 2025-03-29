@@ -16,11 +16,11 @@ export default function ContactUsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-slate-50 to-white text-slate-900 overflow-x-hidden"> {/* Added overflow-x-hidden */}
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 sm:px-8 md:px-16 lg:px-24 py-20 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center text-center px-4 sm:px-8 md:px-16 lg:px-24 py-20">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500" />
         <div className="absolute inset-0 bg-[url('/path/to/pattern.svg')] opacity-10" />
@@ -61,13 +61,12 @@ export default function ContactUsPage() {
       </section>
 
       {/* Contact Form Section */}
-      <div className="relative py-24 px-4 sm:px-8 md:px-16 lg:px-24">
+      <div className="relative flex-grow px-4 sm:px-8 md:px-16 lg:px-24 pb-24 overflow-hidden"> {/* Added overflow-hidden */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="max-w-lg mx-auto"
+          className="max-w-lg mx-auto relative z-10"
         >
           <div className="relative bg-gradient-to-b from-white to-gray-50/50 rounded-2xl p-8 shadow-lg backdrop-blur-sm border border-white/20">
             <div className="relative w-16 h-16 mx-auto mb-6">
@@ -139,12 +138,12 @@ export default function ContactUsPage() {
         </motion.div>
 
         {/* Decorative Elements */}
-        <div className="absolute top-40 -left-64 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 -right-64 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 -left-1/2 w-full aspect-square bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-1/4 -right-1/2 w-full aspect-square bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
       {/* Footer */}
-      <footer className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white py-8">
+      <footer className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 text-white py-8">
         <div className="relative z-10 text-center">
           <p className="text-white/90">&copy; {new Date().getFullYear()} Consultancy Firm. All Rights Reserved.</p>
         </div>
