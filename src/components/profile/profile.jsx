@@ -97,7 +97,7 @@ export default function Profile() {
       // Here’s the updated API call to fetch feedback reports
       const response = await axios.get('http://localhost:3046/api/auth/feedback-report', {
         headers: {
-          Authorization: `Bearer ${token}`  // Send the token as Authorization header
+          Authorization:` Bearer ${token}`  // Send the token as Authorization header
         }
       });
 
@@ -111,6 +111,7 @@ export default function Profile() {
     }
     setLoadingFeedbackReports(false);  // End loading state
   };
+
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -162,10 +163,10 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50  to-white">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 flex gap-8">
+      <div className=" my-14 container mx-auto px-4 py-8 flex gap-8">
         {/* Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -190,7 +191,7 @@ export default function Profile() {
             <h2 className="mt-4 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               {user.name}
             </h2>
-            <p className="text-gray-500 text-sm">{user.email}</p>
+            <p className="text-black text-sm">{user.email}</p>
           </div>
 
           <nav className="space-y-2">
@@ -248,22 +249,22 @@ export default function Profile() {
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Full Name</p>
-                      <p className="font-medium">{user.name}</p>
+                      <p className="text-sm text-black md:text-xl">Full Name</p>
+                      <p className="font-medium text-purple-600 ">{user.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Date of Birth</p>
-                      <p className="font-medium">{user.dob || "Not set"}</p>
+                      <p className="text-sm text-black md:text-xl">Date of Birth</p>
+                      <p className="font-medium text-purple-600">{user.dob || "Not set"}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 md:text-xl">
                     <Phone className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Mobile Number</p>
-                      <p className="font-medium">{user.mobile || "Not set"}</p>
+                      <p className="text-sm text-black md:text-xl">Mobile Number</p>
+                      <p className="font-medium text-purple-400 md:text-lg" >{user.mobile || "Not set"}</p>
                     </div>
                   </div>
                 </div>
@@ -271,15 +272,15 @@ export default function Profile() {
                   <div className="flex items-center gap-3">
                     <MapPin className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Address</p>
-                      <p className="font-medium">{user.address || "Not set"}</p>
+                      <p className="text-sm text-black md:text-xl">Address</p>
+                      <p className="font-medium text-purple-400">{user.address || "Not set"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Hash className="w-5 h-5 text-blue-600" />
                     <div>
-                      <p className="text-sm text-gray-500">Pincode</p>
-                      <p className="font-medium">{user.pincode || "Not set"}</p>
+                      <p className="text-sm text-black md:text-xl">Pincode</p>
+                      <p className="font-medium text-purple-400">{user.pincode || "Not set"}</p>
                     </div>
                   </div>
                 </div>
@@ -289,7 +290,7 @@ export default function Profile() {
                 className="mt-8 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all"
               >
                 Edit Profile
-              </button>
+              </button>   
             </div>
           )}
 
@@ -303,7 +304,7 @@ export default function Profile() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
               ) : appointments.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-black">
                   No appointments found
                 </div>
               ) : (
@@ -320,7 +321,7 @@ export default function Profile() {
                           <Calendar className="w-5 h-5 text-blue-600" />
                           <div>
                             <p className="font-medium">{app.date}</p>
-                            <p className="text-sm text-gray-500">{app.time}</p>
+                            <p className="text-sm text-black">{app.time}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -334,7 +335,7 @@ export default function Profile() {
                         </div>
                       </div>
                       <div className="mt-4">
-                        <p className="text-sm text-gray-500">Type</p>
+                        <p className="text-sm text-black">Type</p>
                         <p className="font-medium">{app.type}</p>
                       </div>
                     </motion.div>
@@ -344,41 +345,81 @@ export default function Profile() {
             </div>
           )}
 
-          {activeTab === "reports" && (
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8">
-                Feedback Reports
-              </h1>
-              {feedbackReports.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  No feedback reports found
+{activeTab === "reports" && (
+  <div className="bg-white rounded-2xl shadow-lg p-8">
+    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8">
+      Feedback Reports
+    </h1>
+    {loadingFeedbackReports ? (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    ) : feedbackReports.length === 0 ? (
+      <div className="text-center py-8 text-black">
+        No feedback reports found
+      </div>
+    ) : (
+      <div className="space-y-4">
+        {feedbackReports.map((report, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 bg-gray-50 rounded-xl border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <div>
+                  <p className="font-medium">Report ID: {report._id}</p>
+                  <p className="text-sm text-black">
+                    Date: {new Date(report.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {feedbackReports.map((report, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-6 bg-gray-50 rounded-xl border border-gray-100"
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <Clock className="w-5 h-5 text-blue-600" />
-                        <p className="text-sm text-gray-500">
-                          {new Date(report.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <p className="text-sm text-gray-500">Report ID</p>
-                      <p className="font-medium mb-4">{report._id}</p>
-                      <p className="text-sm text-gray-500">Feedback</p>
-                      <p className="font-medium">{report.feedback}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+              </div>
             </div>
-          )}
+            <div className="mt-4">
+              <p className="text-sm text-black">Feedback</p>
+              <div className="font-medium mt-2">
+                {(() => {
+                  try {
+                    const parsed = JSON.parse(report.feedbackSummary);
+                    let feedbackText = parsed.parts?.[0]?.text || '';
+                    feedbackText = feedbackText.replace(
+                      /\\(.?)\\*/g,
+                      '<span class="text-blue-600 font-semibold">$1</span>'
+                    );
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: feedbackText }}
+                      />
+                    );
+                  } catch (e) {
+                    console.error("Feedback Parse Error:", e);
+                    return (
+                      <p className="text-red-500">Summary is not available.</p>
+                    );
+                  }
+                })()}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
         </motion.div>
+     
+     
+     
+     
+     
       </div>
     </div>
   );
