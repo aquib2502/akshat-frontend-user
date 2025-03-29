@@ -33,7 +33,7 @@ export default function Profile() {
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (!storedToken) {
-      router.push("/login");
+      router.push("/login");  
     } else {
       setToken(storedToken);
       const storedUser = JSON.parse(localStorage.getItem("userInfo"));
